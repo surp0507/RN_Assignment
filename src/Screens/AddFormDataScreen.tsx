@@ -1,20 +1,34 @@
-import React, { useState } from 'react';
-import { View, Text, Alert, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useEffect, useRef, useState } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    Platform,
+    Animated,
+    Keyboard,
+    TouchableWithoutFeedback,
+} from "react-native";
+import {
+    TextInput,
+    Card,
+    Avatar,
+    Badge,
+    Button,
+    ActivityIndicator,
+    FAB,
+    useTheme,
+    Portal,
+    Provider as PaperProvider,
+} from "react-native-paper";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { savePendingForm } from '../utils/storage';
+import { savePendingForm } from "../utils/storage";
 import { getNetworkStatus } from "../utils/netInfo";
-import { createObject, addLocallyCreated } from '../store/slices';
-import { CreateObjectPayload } from '../types';
+import { createObject, addLocallyCreated } from "../store/slices";
+import { CreateObjectPayload } from "../types";
 
-interface RootState {
-    objects: {
-        loading: boolean;
-        lastCreatedId: string | number | null;
-        error: unknown;
-    };
-}
+type Props = NativeStackScreenProps<any, any>;
 
 interface FormState {
     name: string;
@@ -24,86 +38,110 @@ interface FormState {
     hardDisk: string;
 }
 
-interface ErrorState {
-    name?: string | null;
-    year?: string | null;
-    price?: string | null;
-    cpu?: string | null;
-    hardDisk?: string | null;
-}
-
-type Props = NativeStackScreenProps<any, any>;
-
 export default function AddFormDataScreen({ navigation }: Props) {
+    const theme = useTheme();
     const dispatch = useAppDispatch();
-    const { loading, lastCreatedId, error } = useAppSelector((s: RootState) => s.objects);
+    const { loading, lastCreatedId } = useAppSelector((s: any) => s.objects ?? {});
 
-    const [id, setIDs] = useState<string>("");
     const [form, setForm] = useState<FormState>({
-        name: '',
-        year: '',
-        price: '',
-        cpu: '',
-        hardDisk: '',
+        name: "",
+        year: "",
+        price: "",
+        cpu: "",
+        hardDisk: "",
     });
 
-    const [errors, setErrors] = useState<ErrorState>({});
+    const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+    const [online, setOnline] = useState<boolean | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        let mounted = true;
+        getNetworkStatus().then((s) => {
+            if (mounted) setOnline(Boolean(s));
+        });
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 450,
+            useNativeDriver: true,
+        }).start();
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const setField = (key: keyof FormState, value: string) => {
         let updated = value;
         const newErrors = { ...errors };
 
-        switch (key) {
-            case 'name':
-                updated = value.replace(/[^A-Za-z ]/g, '');
-                newErrors.name = updated.trim() ? null : "Name is required";
-                break;
-
-            case 'year':
-                updated = value.replace(/[^0-9]/g, '');
-                if (updated.length > 4) updated = updated.slice(0, 4);
-                newErrors.year = updated ? null : "Year is required";
-                break;
-
-            case 'price':
-                updated = value.replace(/[^0-9]/g, '');
-                newErrors.price = updated ? null : "Price is required";
-                break;
-
-            case 'hardDisk':
-                updated = value.replace(/[^0-9]/g, '');
-                newErrors.hardDisk = updated ? null : "Hard disk size is required";
-                break;
-
-            case 'cpu':
-                newErrors.cpu = updated.trim() ? null : "CPU model is required";
-                break;
+        if (key === "name") {
+            updated = value.replace(/[^A-Za-z0-9 .\-]/g, "");
+            newErrors.name = updated.trim() ? undefined : "Name is required";
         }
 
-        setForm(prev => ({ ...prev, [key]: updated }));
+        if (key === "year") {
+            updated = value.replace(/[^0-9]/g, "");
+            if (updated.length > 4) updated = updated.slice(0, 4);
+            newErrors.year = updated ? undefined : "Year is required";
+        }
+
+        if (key === "price") {
+            updated = value.replace(/[^0-9]/g, "");
+            newErrors.price = updated ? undefined : "Price is required";
+        }
+
+        if (key === "hardDisk") {
+            updated = value.replace(/[^0-9]/g, "");
+            newErrors.hardDisk = updated ? undefined : "Hard disk is required";
+        }
+
+        if (key === "cpu") {
+            newErrors.cpu = updated.trim() ? undefined : "CPU model is required";
+        }
+
+        setForm((p) => ({ ...p, [key]: updated }));
         setErrors(newErrors);
     };
 
     const validateBeforeSubmit = () => {
-        const newErrors: ErrorState = {};
+        const newErrors: Partial<Record<keyof FormState, string>> = {};
         if (!form.name.trim()) newErrors.name = "Name is required";
         if (!form.year.trim()) newErrors.year = "Year is required";
         if (!form.price.trim()) newErrors.price = "Price is required";
-        if (!form.cpu.trim()) newErrors.cpu = "CPU model is required";
-        if (!form.hardDisk.trim()) newErrors.hardDisk = "Hard disk size is required";
+        if (!form.cpu.trim()) newErrors.cpu = "CPU is required";
+        if (!form.hardDisk.trim()) newErrors.hardDisk = "Hard disk is required";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
+    const pressIn = () =>
+        Animated.spring(scaleAnim, {
+            toValue: 0.96,
+            useNativeDriver: true,
+            stiffness: 200,
+            damping: 12,
+        }).start();
+
+    const pressOut = () =>
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            stiffness: 200,
+            damping: 12,
+        }).start();
+
     const handleSubmit = async () => {
         const valid = validateBeforeSubmit();
-        if (!valid) {
-            Alert.alert("Validation Error", "Please fill all required fields.");
-            return;
-        }
+        if (!valid) return;
 
-        const online = await getNetworkStatus();
-        if (online) {
+        setSubmitting(true);
+        const net = await getNetworkStatus();
+        setOnline(Boolean(net));
+
+        if (net) {
             const payload: CreateObjectPayload = {
                 name: form.name,
                 data: {
@@ -111,158 +149,261 @@ export default function AddFormDataScreen({ navigation }: Props) {
                     price: Number(form.price),
                     cpu: form.cpu,
                     hardDisk: Number(form.hardDisk),
-                }
+                },
             };
 
-            dispatch(createObject(payload)).unwrap()
-                .then((res: any) => {
-                    Alert.alert("Success", `Created object with ID: ${res.id}`);
-                    setIDs(String(res.id));
-                    navigation.navigate('GetFormDataScreen', { id: res.id });
-                })
-                .catch((err: any) => {
-                    const msg = err?.message?.message || err?.message || "Unknown error";
-                    Alert.alert("API Error", msg);
-                });
-
+            try {
+                await dispatch(createObject(payload)).unwrap();
+                setForm({ name: "", year: "", price: "", cpu: "", hardDisk: "" });
+            } catch (e) {
+            } finally {
+                setSubmitting(false);
+            }
         } else {
             const ok = await savePendingForm(form);
             if (ok) {
-                dispatch(addLocallyCreated({ ...form, savedAt: new Date().toISOString() }) as any);
-                Alert.alert("Offline", "Data saved locally.");
-            } else {
-                Alert.alert("Storage Error", "Failed to save locally.");
+                dispatch(addLocallyCreated({ ...form, savedAt: new Date().toISOString() } as any));
+                setForm({ name: "", year: "", price: "", cpu: "", hardDisk: "" });
             }
+            setSubmitting(false);
         }
     };
 
+    const previewEmpty = !form.name && !form.year && !form.price && !form.cpu && !form.hardDisk;
+
     return (
-        <ScrollView contentContainerStyle={styles.wrapper}>
-            <Text style={styles.title}>Add New Product</Text>
-            <Text style={styles.subtitle}>Fill all required fields to continue</Text>
+        <PaperProvider theme={theme}>
+            <ScrollView contentContainerStyle={styles.wrapper}>
+                <Animated.View style={[styles.headerCard, { opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }] }]}>
+                    <View style={styles.headerLeft}>
+                        <Avatar.Icon size={54} icon="package" style={{ backgroundColor: "#E8F0FF" }} color="#003A8C" />
+                        <View style={styles.headerText}>
+                            <Text style={styles.headerTitle}>Create New Product</Text>
+                            <Text style={styles.headerSubtitle}>Add product information for inventory</Text>
+                            <Text style={styles.smallMuted}>{new Date().toLocaleString()}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.headerRight}>
+                        <Badge visible={online ?? false} style={[styles.badge, online ? styles.badgeOnline : styles.badgeOffline]}>
+                            {online ? "Online" : "Offline"}
+                        </Badge>
 
-            <View style={styles.card}>
-                <TextInput
-                    mode="outlined"
-                    label="Name *"
-                    value={form.name}
-                    onChangeText={(t) => setField('name', t)}
-                    error={!!errors.name}
-                    style={styles.input}
-                />
-                {errors.name && <Text style={styles.error}>{errors.name}</Text>}
+                    </View>
+                </Animated.View>
 
-                <TextInput
-                    mode="outlined"
-                    label="Year *"
-                    maxLength={4}
-                    keyboardType="numeric"
-                    value={form.year}
-                    onChangeText={(t) => setField('year', t)}
-                    error={!!errors.year}
-                    style={styles.input}
-                />
-                {errors.year && <Text style={styles.error}>{errors.year}</Text>}
+                <Card style={styles.formCard}>
+                    <Card.Content>
+                        <Text style={styles.sectionTitle}>Product details</Text>
 
-                <TextInput
-                    mode="outlined"
-                    label="Price *"
-                    keyboardType="numeric"
-                    value={form.price}
-                    onChangeText={(t) => setField('price', t)}
-                    error={!!errors.price}
-                    style={styles.input}
-                />
-                {errors.price && <Text style={styles.error}>{errors.price}</Text>}
+                        <TextInput
+                            mode="outlined"
+                            label="Name *"
+                            value={form.name}
+                            onChangeText={(t) => setField("name", t)}
+                            error={!!errors.name}
+                            style={styles.input}
+                        />
+                        {errors.name && <Text style={styles.error}>{errors.name}</Text>}
 
-                <TextInput
-                    mode="outlined"
-                    label="CPU Model *"
-                    value={form.cpu}
-                    onChangeText={(t) => setField('cpu', t)}
-                    error={!!errors.cpu}
-                    style={styles.input}
-                />
-                {errors.cpu && <Text style={styles.error}>{errors.cpu}</Text>}
+                        <View style={styles.row}>
+                            <View style={{ flex: 1 }}>
+                                <TextInput
+                                    mode="outlined"
+                                    label="Year *"
+                                    value={form.year}
+                                    onChangeText={(t) => setField("year", t)}
+                                    error={!!errors.year}
+                                    keyboardType="numeric"
+                                    maxLength={4}
+                                    style={[styles.input, { marginRight: 8 }]}
+                                />
+                                {errors.year && <Text style={styles.error}>{errors.year}</Text>}
+                            </View>
 
-                <TextInput
-                    mode="outlined"
-                    label="Hard Disk (GB) *"
-                    keyboardType="numeric"
-                    value={form.hardDisk}
-                    onChangeText={(t) => setField('hardDisk', t)}
-                    error={!!errors.hardDisk}
-                    style={styles.input}
-                />
-                {errors.hardDisk && <Text style={styles.error}>{errors.hardDisk}</Text>}
-            </View>
+                            <View style={{ flex: 1 }}>
+                                <TextInput
+                                    mode="outlined"
+                                    label="Price *"
+                                    value={form.price}
+                                    onChangeText={(t) => setField("price", t)}
+                                    error={!!errors.price}
+                                    keyboardType="numeric"
+                                    left={<TextInput.Icon icon="currency-inr" />}
+                                    style={[styles.input, { marginLeft: 8 }]}
+                                />
+                                {errors.price && <Text style={styles.error}>{errors.price}</Text>}
+                            </View>
+                        </View>
 
-            {loading ? (
-                <ActivityIndicator size="large" style={{ marginTop: 20 }} />
-            ) : (
-                <TouchableOpacity style={styles.primaryBtn} onPress={handleSubmit}>
-                    <Text style={styles.primaryBtnText}>Submit</Text>
-                </TouchableOpacity>
-            )}
+                        <TextInput
+                            mode="outlined"
+                            label="CPU Model *"
+                            value={form.cpu}
+                            onChangeText={(t) => setField("cpu", t)}
+                            error={!!errors.cpu}
+                            left={<TextInput.Icon icon="chip" />}
+                            style={styles.input}
+                        />
+                        {errors.cpu && <Text style={styles.error}>{errors.cpu}</Text>}
 
-            <TouchableOpacity
-                style={styles.secondaryBtn}
-                onPress={() => navigation.navigate("GetFormDataScreen", { id })}
-            >
-                <Text style={styles.secondaryBtnText}>Fetch Data by ID</Text>
-            </TouchableOpacity>
+                        <TextInput
+                            mode="outlined"
+                            label="Hard Disk (GB) *"
+                            value={form.hardDisk}
+                            onChangeText={(t) => setField("hardDisk", t)}
+                            error={!!errors.hardDisk}
+                            keyboardType="numeric"
+                            left={<TextInput.Icon icon="harddisk" />}
+                            style={styles.input}
+                        />
+                        {errors.hardDisk && <Text style={styles.error}>{errors.hardDisk}</Text>}
+                    </Card.Content>
+                </Card>
 
-            {lastCreatedId && <Text style={styles.lastId}>Last Created ID: {lastCreatedId}</Text>}
-        </ScrollView>
+                <Card style={[styles.previewCard, previewEmpty && styles.previewCardDim]}>
+                    <Card.Content>
+                        <Text style={styles.sectionTitle}>Live preview</Text>
+                        <View style={styles.previewRow}>
+                            <Text style={styles.previewLabel}>Name</Text>
+                            <Text style={styles.previewValue}>{form.name || "-"}</Text>
+                        </View>
+                        <View style={styles.previewRow}>
+                            <Text style={styles.previewLabel}>Year</Text>
+                            <Text style={styles.previewValue}>{form.year || "-"}</Text>
+                        </View>
+                        <View style={styles.previewRow}>
+                            <Text style={styles.previewLabel}>Price</Text>
+                            <Text style={styles.previewValue}>{form.price ? `₹ ${form.price}` : "-"}</Text>
+                        </View>
+                        <View style={styles.previewRow}>
+                            <Text style={styles.previewLabel}>CPU</Text>
+                            <Text style={styles.previewValue}>{form.cpu || "-"}</Text>
+                        </View>
+                        <View style={styles.previewRow}>
+                            <Text style={styles.previewLabel}>Hard Disk</Text>
+                            <Text style={styles.previewValue}>{form.hardDisk ? `${form.hardDisk} GB` : "-"}</Text>
+                        </View>
+                    </Card.Content>
+                </Card>
+
+                <View style={styles.actions}>
+                    {loading || submitting ? (
+                        <ActivityIndicator animating size="large" style={{ marginTop: 8 }} />
+                    ) : (
+                        <TouchableWithoutFeedback onPressIn={pressIn} onPressOut={pressOut}>
+                            <Animated.View style={[styles.primaryBtn, { transform: [{ scale: scaleAnim }] }]}>
+                                <Button
+                                    mode="contained"
+                                    contentStyle={{ height: 52 }}
+                                    labelStyle={{ fontSize: 16, fontWeight: "700" }}
+                                    onPress={handleSubmit}
+                                >
+                                    Submit
+                                </Button>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    )}
+
+                    <Button
+                        mode="outlined"
+                        onPress={() => navigation.navigate("GetFormDataScreen", { id: lastCreatedId ?? "" })}
+                        style={styles.secondaryBtn}
+                        contentStyle={{ height: 50 }}
+                        labelStyle={{ fontSize: 15, fontWeight: "600" }}
+                    >
+                        Fetch Data by ID
+                    </Button>
+                </View>
+
+                <Text style={styles.lastIdText}>Last Created ID: {String(lastCreatedId ?? "-")}</Text>
+
+            </ScrollView>
+        </PaperProvider>
     );
 }
 
 const styles = StyleSheet.create({
-    wrapper: { padding: 20, paddingBottom: 40, backgroundColor: "#F5F7FA" },
-    title: { fontSize: 26, fontWeight: "700", color: "#001A4D", marginBottom: 4 },
-    subtitle: { fontSize: 14, color: "#5A6C8A", marginBottom: 18 },
-    card: {
+    wrapper: {
+        padding: 16,
+        paddingBottom: 40,
+        backgroundColor: "#F6F9FF",
+    },
+    headerCard: {
         backgroundColor: "white",
-        padding: 18,
-        borderRadius: 16,
+        borderRadius: 14,
+        padding: 14,
+        marginBottom: 16,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         elevation: 4,
         shadowColor: "#000",
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+    },
+    headerLeft: { flexDirection: "row", alignItems: "center" },
+    headerText: { marginLeft: 12 },
+    headerTitle: { fontSize: 18, fontWeight: "700", color: "#002853" },
+    headerSubtitle: { fontSize: 13, color: "#576675", marginTop: 2 },
+    headerRight: { alignItems: "flex-end" },
+    badge: { alignSelf: "flex-end", marginBottom: 6 },
+    badgeOnline: { backgroundColor: "#E6F4EA", color: "#116530" },
+    badgeOffline: { backgroundColor: "#FFF2F0", color: "#9B2C2C" },
+    smallMuted: { fontSize: 11, color: "#7A8797" },
+    formCard: {
+        borderRadius: 14,
+        marginBottom: 14,
+        overflow: "hidden",
+        elevation: 2,
+    },
+    sectionTitle: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: "#01305A",
+        marginBottom: 10,
+    },
+    input: {
+        marginBottom: 6,
+        backgroundColor: "white",
+    },
+    error: { color: "#B92525", fontSize: 12, marginBottom: 6 },
+    row: { flexDirection: "row", alignItems: "center" },
+    previewCard: {
+        borderRadius: 14,
+        marginBottom: 18,
+        overflow: "hidden",
+        elevation: 1,
+        backgroundColor: "white",
+    },
+    previewCardDim: {
+        opacity: 0.95,
+    },
+    previewRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 },
+    previewLabel: { color: "#7A8797", fontSize: 13 },
+    previewValue: { fontSize: 14, color: "#14202B", fontWeight: "600" },
+    actions: { marginTop: 6 },
+    primaryBtn: {
+        borderRadius: 12,
+        overflow: "hidden",
+        marginBottom: 12,
+        elevation: 3,
+        shadowColor: "#003A8C",
         shadowOpacity: 0.08,
         shadowRadius: 8,
-        shadowOffset: { width: 0, height: 4 }
+        shadowOffset: { width: 0, height: 6 },
     },
-    input: { marginTop: 14 },
-    error: { color: "red", fontSize: 12, marginTop: 2 },
-    primaryBtn: {
-        marginTop: 24,
-        backgroundColor: "#0066FF",
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: "center",
-        elevation: 3
-    },
-    primaryBtnText: {
-        color: "white",
-        fontSize: 17,
-        fontWeight: "700"
-    },
-    secondaryBtn: {
-        marginTop: 16,
-        paddingVertical: 15,
-        borderRadius: 12,
-        borderWidth: 1.4,
-        borderColor: "#0066FF",
-        alignItems: "center"
-    },
-    secondaryBtnText: {
-        color: "#0066FF",
-        fontSize: 16,
-        fontWeight: "600"
-    },
-    lastId: {
+    secondaryBtn: { borderRadius: 12, shadowColor: "#003A8C", borderWidth: 1.2 },
+    lastIdText: {
         textAlign: "center",
-        marginTop: 18,
-        fontSize: 14,
-        color: "#37475A"
-    }
+        marginTop: 14,
+        fontSize: 13,
+        color: "#344955",
+    },
+    fab: {
+        position: "absolute",
+        right: 16,
+        bottom: Platform.OS === "ios" ? 24 : 18,
+        backgroundColor: "#0066FF",
+    },
 });
