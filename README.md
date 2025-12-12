@@ -2,7 +2,11 @@
 
 A modern **React Native** application structured for scalability, maintainability, and clean code. This project follows a modular folder architecture including screens, API layer, Redux Toolkit slices, utilities, and TypeScript types.
 
----
+
+
+https://github.com/user-attachments/assets/2c538430-a07e-412d-b6ac-21045c45dfb9
+
+
 
 ## 📁 Project Structure
 
