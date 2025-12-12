@@ -24,6 +24,10 @@ With Metro running, open a new terminal window/pane from the root of your React 
 npm run android
 
 # OR using Yarn
+
+https://github.com/user-attachments/assets/f71c344e-2a91-4534-bb99-1efb4a523320
+
+
 yarn android
 ```
 
@@ -53,41 +57,43 @@ npm run ios
 yarn ios
 ```
 
+https://github.com/user-attachments/assets/e6db2778-9068-402c-9843-018c3a08cff7
+
 ### Folderstructure
 
-
 AWESOMEPROJECT
-├── android/ # Native Android project
-├── ios/ # Native iOS project
-├── node_modules/ # Dependencies
+├── android/                 # Native Android project
+├── ios/                     # Native iOS project
+├── node_modules/            # Dependencies
 │
-├── src/ # Main source code
-│ ├── api/ # API & network modules
-│ │
-│ ├── Screens/ # Screens (UI pages)
-│ │ ├── Screen1.tsx
-│ │ └── Screen2.tsx
-│ │
-│ ├── slices/ # Redux Toolkit slices
-│ │ └── index.ts
-│ │
-│ ├── store/ # Redux store config
-│ │ └── index.ts
-│ │
-│ ├── types/ # Type definitions
-│ │ └── index.ts
-│ │
-│ ├── utils/ # Helper functions (NetInfo, Storage, etc.)
-│ │ ├── netInfo.ts
-│ │ └── storage.js
-│ │
-│ └── App.tsx # App entry point
+├── src/                     # Main source code
+│   ├── api/                 # API & network modules
+│   │
+│   ├── Screens/             # Screens (UI pages)
+│   │   ├── Screen1.tsx
+│   │   └── Screen2.tsx
+│   │
+│   ├── slices/              # Redux Toolkit slices
+│   │   └── index.ts
+│   │
+│   ├── store/               # Redux store config
+│   │   └── index.ts
+│   │
+│   ├── types/               # Type definitions
+│   │   └── index.ts
+│   │
+│   ├── utils/               # Helpers (NetInfo, Storage, etc.)
+│   │   ├── netInfo.ts
+│   │   └── storage.js
+│   │
+│   └── App.tsx              # App entry point
 │
-├── .eslintrc.js # ESLint config
-├── .prettierrc.js # Prettier config
+├── .eslintrc.js             # ESLint config
+├── .prettierrc.js           # Prettier config
 ├── .gitignore
-├── babel.config.js # Babel compiler config
-├── metro.config.js # Metro bundler config
-├── package.json # Dependencies & scripts
-├── tsconfig.json # TypeScript config
-└── README.md # Project documentation
+├── babel.config.js          # Babel config
+├── metro.config.js          # Metro bundler config
+├── package.json             # Project scripts & dependencies
+├── tsconfig.json            # TypeScript config
+└── README.md                # Project documentation
+
