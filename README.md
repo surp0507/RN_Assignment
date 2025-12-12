@@ -1,93 +1,144 @@
+# AwesomeProject
 
+A modern **React Native** application structured for scalability, maintainability, and clean code. This project follows a modular folder architecture including screens, API layer, Redux Toolkit slices, utilities, and TypeScript types.
 
-## Step 1: Start Metro
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+---
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 📁 Project Structure
+
+```
+AwesomeProject
+│
+├── __tests__/              # Test files
+├── android/                # Native Android project
+├── ios/                    # Native iOS project
+├── node_modules/           # Dependencies
+├── src/
+│   ├── api/                # API functions and axios setup
+│   ├── Screens/            # All screens/components
+│   ├── slices/             # Redux Toolkit slices
+│   ├── store/              # Redux store setup
+│   ├── types/              # Global TypeScript types
+│   └── utils/              # Utility/helper functions
+│
+├── .eslintrc.js            # Linting configuration
+├── .gitignore              # Git ignore rules
+├── .prettierrc.js          # Prettier formatting config
+├── .watchmanconfig         # Watchman configuration
+├── App.tsx                 # Root App Component
+├── app.json                # App configuration
+├── babel.config.js         # Babel configuration
+├── index.js                # Entry point
+├── jest.config.js          # Jest test configuration
+├── metro.config.js         # Metro bundler config
+├── package.json            # App metadata and dependencies
+├── tsconfig.json           # TypeScript config
+├── yarn.lock               # Dependency lock file
+└── README.md               # Project documentation
+```
+
+---
+
+## 🚀 Features
+
+* 📱 Built with **React Native**
+* ⚡ State management using **Redux Toolkit**
+* 🧪 Configured with **Jest** for testing
+* 🧩 Modular and scalable folder structure
+* 🛠 API abstraction layer with clean utilities
+* 🔒 Type safety using **TypeScript**
+
+---
+
+## 🔧 Installation
 
 ```sh
-# Using npm
-npm start
+yarn install
+# or
+npm install
+```
 
-# OR using Yarn
+---
+
+## ▶️ Running the App
+
+### Start Metro Bundler
+
+```sh
 yarn start
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+### Run on Android
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
 yarn android
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### Run on iOS
 
 ```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
 yarn ios
 ```
 
-### Folderstructure
+---
 
+## 🧪 Running Tests
 
-AWESOMEPROJECT
-├── android/ # Native Android project
-├── ios/ # Native iOS project
-├── node_modules/ # Dependencies
-│
-├── src/ # Main source code
-│ ├── api/ # API & network modules
-│ │
-│ ├── Screens/ # Screens (UI pages)
-│ │ ├── Screen1.tsx
-│ │ └── Screen2.tsx
-│ │
-│ ├── slices/ # Redux Toolkit slices
-│ │ └── index.ts
-│ │
-│ ├── store/ # Redux store config
-│ │ └── index.ts
-│ │
-│ ├── types/ # Type definitions
-│ │ └── index.ts
-│ │
-│ ├── utils/ # Helper functions (NetInfo, Storage, etc.)
-│ │ ├── netInfo.ts
-│ │ └── storage.js
-│ │
-│ └── App.tsx # App entry point
-│
-├── .eslintrc.js # ESLint config
-├── .prettierrc.js # Prettier config
-├── .gitignore
-├── babel.config.js # Babel compiler config
-├── metro.config.js # Metro bundler config
-├── package.json # Dependencies & scripts
-├── tsconfig.json # TypeScript config
-└── README.md # Project documentation
+```sh
+yarn test
+```
+
+---
+
+## 🏗 Build Structure Overview
+
+### **src/api/**
+
+Contains all API-related code, axios configurations, and request functions.
+
+### **src/Screens/**
+
+Includes all app screens, separated into feature folders.
+
+### **src/slices/**
+
+Redux Toolkit slices for state management.
+
+### **src/store/**
+
+The central Redux store configuration.
+
+### **src/types/**
+
+TypeScript types/interfaces used throughout the project.
+
+### **src/utils/**
+
+Helper and utility functions.
+
+---
+
+## 📦 Scripts
+
+Common commands available:
+
+```json
+"scripts": {
+  "start": "react-native start",
+  "android": "react-native run-android",
+  "ios": "react-native run-ios",
+  "test": "jest"
+}
+```
+
+---
+
+## 🤝 Contributing
+
+Feel free to contribute! Fork the repo, create a feature branch, and open a pull request.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
