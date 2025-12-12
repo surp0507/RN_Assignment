@@ -1,45 +1,70 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useRef, useState } from 'react';
+import { Provider } from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { store } from './src/store'
+import AddFormDataScreen from "./src/Screens/AddFormDataScreen"
+import GetFormDataScreen from "./src/Screens/GetFormDataScreen"
+import NetInfo from '@react-native-community/netinfo';
+import Toast from 'react-native-toast-message';
+import { isOnline } from './src/utils/netInfo';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+const Stack = createNativeStackNavigator();
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(async state => {
+      const online = await isOnline();
+      if (online) {
+        setIsConnected(online);
+        Toast.show({
+          type: 'info',
+          text1: online ? 'Online Mode' : 'Offline Mode',
+          position: 'top',
+          visibilityTime: 2000,
+        });
+      } else {
+        Toast.show({
+          type: 'info',
+          text1: 'Offline Mode',
+          position: 'top',
+          visibilityTime: 2000,
+        });
+      }
+    });
+    (async () => {
+      const online = await isOnline();
+      setIsConnected(online);
+    })();
+
+    return () => unsubscribe();
+  }, [isConnected]);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <NavigationContainer>
+
+        <Stack.Navigator initialRouteName="AddFormDataScreen">
+          <Stack.Screen
+            name="AddFormDataScreen"
+            component={AddFormDataScreen}
+            options={{ title: 'Add Product' }}
+          />
+          <Stack.Screen
+            name="GetFormDataScreen"
+            component={GetFormDataScreen}
+            options={{ title: 'Search Product' }}
+          />
+        </Stack.Navigator>
+        <Toast />
+      </NavigationContainer>
+    </Provider>
   );
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
+
+
+
