@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, Alert, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import NetInfo from '@react-native-community/netinfo';
-import { createObject, addLocallyCreated } from '../store/slices';
-import { savePendingForm } from '../utils/storage';
-import { getNetworkStatus } from "../utils/netInfo";
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppDispatch, useAppSelector } from "../hooks";
+import { savePendingForm } from '../utils/storage';
+import { getNetworkStatus } from "../utils/netInfo";
+import { createObject, addLocallyCreated } from '../store/slices';
 import { CreateObjectPayload } from '../types';
 
 interface RootState {
@@ -38,10 +37,8 @@ type Props = NativeStackScreenProps<any, any>;
 export default function AddFormDataScreen({ navigation }: Props) {
     const dispatch = useAppDispatch();
     const { loading, lastCreatedId, error } = useAppSelector((s: RootState) => s.objects);
-    console.log(lastCreatedId, "lastcreatedId")
 
     const [id, setIDs] = useState<string>("");
-
     const [form, setForm] = useState<FormState>({
         name: '',
         year: '',
@@ -106,7 +103,6 @@ export default function AddFormDataScreen({ navigation }: Props) {
         }
 
         const online = await getNetworkStatus();
-        console.log(online, "online")
         if (online) {
             const payload: CreateObjectPayload = {
                 name: form.name,
@@ -133,108 +129,140 @@ export default function AddFormDataScreen({ navigation }: Props) {
             const ok = await savePendingForm(form);
             if (ok) {
                 dispatch(addLocallyCreated({ ...form, savedAt: new Date().toISOString() }) as any);
-                Alert.alert("Offline", "Data saved locally you are in offline mode.");
+                Alert.alert("Offline", "Data saved locally.");
             } else {
                 Alert.alert("Storage Error", "Failed to save locally.");
             }
         }
     };
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={styles.wrapper}>
+            <Text style={styles.title}>Add New Product</Text>
+            <Text style={styles.subtitle}>Fill all required fields to continue</Text>
 
-            <TextInput
-                mode="outlined"
-                label="Name *"
-                value={form.name}
-                onChangeText={(t) => setField('name', t)}
-                error={!!errors.name}
-                style={styles.input}
-            />
-            {errors.name && <Text style={styles.error}>{errors.name}</Text>}
+            <View style={styles.card}>
+                <TextInput
+                    mode="outlined"
+                    label="Name *"
+                    value={form.name}
+                    onChangeText={(t) => setField('name', t)}
+                    error={!!errors.name}
+                    style={styles.input}
+                />
+                {errors.name && <Text style={styles.error}>{errors.name}</Text>}
 
-            <TextInput
-                mode="outlined"
-                label="Year *"
-                maxLength={4}
-                keyboardType="numeric"
-                value={form.year}
-                onChangeText={(t) => setField('year', t)}
-                error={!!errors.year}
-                style={styles.input}
-            />
-            {errors.year && <Text style={styles.error}>{errors.year}</Text>}
+                <TextInput
+                    mode="outlined"
+                    label="Year *"
+                    maxLength={4}
+                    keyboardType="numeric"
+                    value={form.year}
+                    onChangeText={(t) => setField('year', t)}
+                    error={!!errors.year}
+                    style={styles.input}
+                />
+                {errors.year && <Text style={styles.error}>{errors.year}</Text>}
 
-            <TextInput
-                mode="outlined"
-                label="Price *"
-                keyboardType="numeric"
-                value={form.price}
-                onChangeText={(t) => setField('price', t)}
-                error={!!errors.price}
-                style={styles.input}
-            />
-            {errors.price && <Text style={styles.error}>{errors.price}</Text>}
+                <TextInput
+                    mode="outlined"
+                    label="Price *"
+                    keyboardType="numeric"
+                    value={form.price}
+                    onChangeText={(t) => setField('price', t)}
+                    error={!!errors.price}
+                    style={styles.input}
+                />
+                {errors.price && <Text style={styles.error}>{errors.price}</Text>}
 
-            <TextInput
-                mode="outlined"
-                label="CPU Model *"
-                value={form.cpu}
-                onChangeText={(t) => setField('cpu', t)}
-                error={!!errors.cpu}
-                style={styles.input}
-            />
-            {errors.cpu && <Text style={styles.error}>{errors.cpu}</Text>}
+                <TextInput
+                    mode="outlined"
+                    label="CPU Model *"
+                    value={form.cpu}
+                    onChangeText={(t) => setField('cpu', t)}
+                    error={!!errors.cpu}
+                    style={styles.input}
+                />
+                {errors.cpu && <Text style={styles.error}>{errors.cpu}</Text>}
 
-            <TextInput
-                mode="outlined"
-                label="Hard Disk (GB) *"
-                keyboardType="numeric"
-                value={form.hardDisk}
-                onChangeText={(t) => setField('hardDisk', t)}
-                error={!!errors.hardDisk}
-                style={styles.input}
-            />
-            {errors.hardDisk && <Text style={styles.error}>{errors.hardDisk}</Text>}
+                <TextInput
+                    mode="outlined"
+                    label="Hard Disk (GB) *"
+                    keyboardType="numeric"
+                    value={form.hardDisk}
+                    onChangeText={(t) => setField('hardDisk', t)}
+                    error={!!errors.hardDisk}
+                    style={styles.input}
+                />
+                {errors.hardDisk && <Text style={styles.error}>{errors.hardDisk}</Text>}
+            </View>
 
             {loading ? (
-                <ActivityIndicator />
+                <ActivityIndicator size="large" style={{ marginTop: 20 }} />
             ) : (
-                <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
-                    <Text style={styles.btnText}>Submit</Text>
+                <TouchableOpacity style={styles.primaryBtn} onPress={handleSubmit}>
+                    <Text style={styles.primaryBtnText}>Submit</Text>
                 </TouchableOpacity>
             )}
 
             <TouchableOpacity
-                style={styles.btn}
+                style={styles.secondaryBtn}
                 onPress={() => navigation.navigate("GetFormDataScreen", { id })}
             >
-                <Text style={styles.btnText}>Fetch Data By ID</Text>
+                <Text style={styles.secondaryBtnText}>Fetch Data by ID</Text>
             </TouchableOpacity>
 
-            {Boolean(error) && (
-                <Text style={{ color: "red" }}>{String(error)}</Text>
-            )}
-
-            {lastCreatedId && <Text style={{ marginTop: 10 }}>Last Created ID: {lastCreatedId}</Text>}
+            {lastCreatedId && <Text style={styles.lastId}>Last Created ID: {lastCreatedId}</Text>}
         </ScrollView>
     );
 }
 
-
 const styles = StyleSheet.create({
-    container: { padding: 16 },
-    input: { marginTop: 12 },
-    error: { color: 'red', fontSize: 12, marginTop: 2 },
-    btn: {
-        marginTop: 20,
-        padding: 14,
-        backgroundColor: "blue",
-        borderRadius: 10,
+    wrapper: { padding: 20, paddingBottom: 40, backgroundColor: "#F5F7FA" },
+    title: { fontSize: 26, fontWeight: "700", color: "#001A4D", marginBottom: 4 },
+    subtitle: { fontSize: 14, color: "#5A6C8A", marginBottom: 18 },
+    card: {
+        backgroundColor: "white",
+        padding: 18,
+        borderRadius: 16,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 }
+    },
+    input: { marginTop: 14 },
+    error: { color: "red", fontSize: 12, marginTop: 2 },
+    primaryBtn: {
+        marginTop: 24,
+        backgroundColor: "#0066FF",
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: "center",
+        elevation: 3
+    },
+    primaryBtnText: {
+        color: "white",
+        fontSize: 17,
+        fontWeight: "700"
+    },
+    secondaryBtn: {
+        marginTop: 16,
+        paddingVertical: 15,
+        borderRadius: 12,
+        borderWidth: 1.4,
+        borderColor: "#0066FF",
         alignItems: "center"
     },
-    btnText: {
-        color: "white",
-        fontWeight: "700",
-        fontSize: 16
+    secondaryBtnText: {
+        color: "#0066FF",
+        fontSize: 16,
+        fontWeight: "600"
+    },
+    lastId: {
+        textAlign: "center",
+        marginTop: 18,
+        fontSize: 14,
+        color: "#37475A"
     }
 });
