@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, Alert, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
-import { createObject, addLocallyCreated } from '../slices/';
+import { createObject, addLocallyCreated } from '../store/slices';
 import { savePendingForm } from '../utils/storage';
-import { isOnline } from '../utils/netInfo';
+import { getNetworkStatus } from "../utils/netInfo";
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../hooks";
 import { CreateObjectPayload } from '../types';
 
 interface RootState {
@@ -38,6 +38,7 @@ type Props = NativeStackScreenProps<any, any>;
 export default function AddFormDataScreen({ navigation }: Props) {
     const dispatch = useAppDispatch();
     const { loading, lastCreatedId, error } = useAppSelector((s: RootState) => s.objects);
+    console.log(lastCreatedId, "lastcreatedId")
 
     const [id, setIDs] = useState<string>("");
 
@@ -103,7 +104,9 @@ export default function AddFormDataScreen({ navigation }: Props) {
             Alert.alert("Validation Error", "Please fill all required fields.");
             return;
         }
-        const online = await isOnline();
+
+        const online = await getNetworkStatus();
+        console.log(online, "online")
         if (online) {
             const payload: CreateObjectPayload = {
                 name: form.name,
@@ -136,7 +139,6 @@ export default function AddFormDataScreen({ navigation }: Props) {
             }
         }
     };
-
     return (
         <ScrollView contentContainerStyle={styles.container}>
 

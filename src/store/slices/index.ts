@@ -1,51 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import api from "../api";
-import { CreateObjectPayload } from "../types";
-export interface ObjectPayload {
-    name: string;
-    data: {
-        year: number;
-        price: number;
-        cpu: string;
-        hardDisk: number;
-    };
-}
+import api from "../../api";
+import { CreatedObjectResponse, CreateObjectPayload, ErrorResponse, initialState } from "../../types";
 
-export interface CreatedObjectResponse {
-    id: string | number;
-    name: string;
-    data: {
-        year: number;
-        price: number;
-        cpu: string;
-        hardDisk: number;
-    };
-}
-
-export interface ErrorResponse {
-    status?: number;
-    message: string | object;
-}
-
-export interface QueryStringParam {
-    query: string;
-}
-
-export interface ObjectsState {
-    created: CreatedObjectResponse[];
-    fetched: any[];
-    loading: boolean;
-    error: ErrorResponse | null;
-    lastCreatedId: string | number | null;
-}
-
-const initialState: ObjectsState = {
-    created: [],
-    fetched: [],
-    loading: false,
-    error: null,
-    lastCreatedId: null,
-};
 
 export const createObject = createAsyncThunk<
     CreatedObjectResponse,
@@ -58,16 +14,29 @@ export const createObject = createAsyncThunk<
             const response = await api.post("/objects", payload);
             return response.data as CreatedObjectResponse;
         } catch (err: any) {
+
             if (err.response) {
                 return rejectWithValue({
                     status: err.response.status,
                     message: err.response.data || err.message,
                 });
             }
-            return rejectWithValue({ message: err.message });
+
+            if (err.request) {
+                return rejectWithValue({
+                    status: 0,
+                    message: "Network Error. Please check your connection.",
+                });
+            }
+
+            return rejectWithValue({
+                status: 0,
+                message: err.message || "Unknown Error",
+            });
         }
     }
 );
+
 
 export const getObjectsByIds = createAsyncThunk<
     any[],

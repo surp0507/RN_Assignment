@@ -1,27 +1,13 @@
 import NetInfo from '@react-native-community/netinfo';
 
-export const isOnline = async () => {
-    try {
-        const state = await NetInfo.fetch();
+export const subscribeNetwork = (callback: (isConnected: boolean) => void) => {
+    return NetInfo.addEventListener(state => {
+        const status = state.isInternetReachable ?? state.isConnected;
+        callback(!!status);
+    });
+};
 
-        if (!state.isConnected) return false;
-
-        // active probe
-
-        const controller = new AbortController();
-
-        const timeout = setTimeout(() => controller.abort(), 1500);
-
-        await fetch('https://www.google.com/generate_204', {
-            method: 'GET',
-
-            signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        return true;
-    } catch (e) {
-        return false;
-    }
+export const getNetworkStatus = async (): Promise<boolean> => {
+    const state = await NetInfo.fetch();
+    return !!(state.isInternetReachable ?? state.isConnected);
 };

@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import { TextInput } from 'react-native-paper';
 import { useRoute, RouteProp } from "@react-navigation/native";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../hooks";
 import {
     getObjectsByIds,
     setFetchedFromStorage,
-} from "../slices";
+} from "../store/slices";
 import { saveLastFetched, getLastFetched } from "../utils/storage";
-import { isOnline } from "../utils/netInfo";
+import { getNetworkStatus } from "../utils/netInfo";
 
 type RootStackParamList = {
     GetFormDataScreen: { id: string };
@@ -62,7 +62,7 @@ export default function GetFormDataScreen() {
             return;
         }
 
-        const online = await isOnline();
+        const online = await getNetworkStatus();
 
         if (online) {
             dispatch(getObjectsByIds(ids))
