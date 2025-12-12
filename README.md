@@ -56,4 +56,38 @@ yarn ios
 ### Folderstructure
 
 
-
+AWESOMEPROJECT
+├── android/ # Native Android project
+├── ios/ # Native iOS project
+├── node_modules/ # Dependencies
+│
+├── src/ # Main source code
+│ ├── api/ # API & network modules
+│ │
+│ ├── Screens/ # Screens (UI pages)
+│ │ ├── Screen1.tsx
+│ │ └── Screen2.tsx
+│ │
+│ ├── slices/ # Redux Toolkit slices
+│ │ └── index.ts
+│ │
+│ ├── store/ # Redux store config
+│ │ └── index.ts
+│ │
+│ ├── types/ # Type definitions
+│ │ └── index.ts
+│ │
+│ ├── utils/ # Helper functions (NetInfo, Storage, etc.)
+│ │ ├── netInfo.ts
+│ │ └── storage.js
+│ │
+│ └── App.tsx # App entry point
+│
+├── .eslintrc.js # ESLint config
+├── .prettierrc.js # Prettier config
+├── .gitignore
+├── babel.config.js # Babel compiler config
+├── metro.config.js # Metro bundler config
+├── package.json # Dependencies & scripts
+├── tsconfig.json # TypeScript config
+└── README.md # Project documentation
