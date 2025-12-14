@@ -43,3 +43,11 @@ export const initialState: ObjectsState = {
     error: null,
     lastCreatedId: null,
 };
+
+export interface FormState {
+    name: string;
+    year: string;
+    price: string;
+    cpu: string;
+    hardDisk: string;
+}

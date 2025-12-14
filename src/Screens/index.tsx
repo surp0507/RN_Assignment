@@ -21,7 +21,7 @@ const HomeStack = () => {
                 <Stack.Screen
                     name="GetFormDataScreen"
                     component={GetFormDataScreen}
-                    options={{ title: 'Search Product' }}
+                    options={{ title: '' }}
                 />
             </Stack.Navigator>
         </>

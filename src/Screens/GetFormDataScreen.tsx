@@ -114,7 +114,7 @@ export default function GetFormDataScreen() {
                         value={ids}
                         onChangeText={onChangeIds}
                         keyboardType="default"
-                        left={<TextInput.Icon icon="tag" />}
+
                         style={styles.input}
                     />
 

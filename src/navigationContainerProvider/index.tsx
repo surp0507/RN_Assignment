@@ -5,12 +5,11 @@ import { useEffect, useState } from 'react';
 import { getNetworkStatus, subscribeNetwork } from '../utils/netInfo';
 
 export default function AppNavigator() {
-    const [online, setOnline] = useState(true);
+
 
     useEffect(() => {
-        getNetworkStatus().then(setOnline);
+        getNetworkStatus().then();
         const unsub = subscribeNetwork(status => {
-            setOnline(status);
             if (!status) {
                 Toast.show({
                     type: 'error',
