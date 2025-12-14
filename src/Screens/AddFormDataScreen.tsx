@@ -169,8 +169,28 @@ export default function AddFormDataScreen({ navigation }: Props) {
 
                 <FormCard>
                     <FormInput label="Name *" value={form.name} onChange={(t) => setField("name", t)} error={errors.name} />
-                    <FormInput label="Year *" value={form.year} onChange={(t) => setField("year", t)} error={errors.year} keyboardType="numeric" />
-                    <FormInput label="Price *" value={form.price} onChange={(t) => setField("price", t)} error={errors.price} keyboardType="numeric" icon="currency-inr" />
+                    <View style={styles.row}>
+                        <View style={styles.half}>
+                            <FormInput
+                                label="Year *"
+                                value={form.year}
+                                onChange={(t) => setField("year", t)}
+                                error={errors.year}
+                                keyboardType="numeric"
+                            />
+                        </View>
+
+                        <View style={styles.half}>
+                            <FormInput
+                                label="Price *"
+                                value={form.price}
+                                onChange={(t) => setField("price", t)}
+                                error={errors.price}
+                                keyboardType="numeric"
+                                icon="currency-inr"
+                            />
+                        </View>
+                    </View>
                     <FormInput label="CPU Model *" value={form.cpu} onChange={(t) => setField("cpu", t)} error={errors.cpu} icon="chip" />
                     <FormInput label="Hard Disk (GB) *" value={form.hardDisk} onChange={(t) => setField("hardDisk", t)} error={errors.hardDisk} keyboardType="numeric" icon="harddisk" />
                 </FormCard>
@@ -199,6 +219,14 @@ const styles = StyleSheet.create({
     badge: { alignSelf: "flex-end", marginBottom: 6 },
     badgeOnline: { backgroundColor: "#E6F4EA", color: "#116530" },
     badgeOffline: { backgroundColor: "#FFF2F0", color: "#9B2C2C" },
+    row: {
+        flexDirection: "row",
+        gap: 12,
+    },
+
+    half: {
+        flex: 1,
+    },
     smallMuted: { fontSize: 11, color: "#7A8797" },
     lastIdText: { textAlign: "center", marginTop: 14, fontSize: 13, color: "#344955" },
 });

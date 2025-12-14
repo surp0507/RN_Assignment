@@ -51,3 +51,14 @@ export interface FormState {
     cpu: string;
     hardDisk: string;
 }
+
+export interface ProductData {
+    id: string;
+    name: string;
+    data: {
+        year: number;
+        price: number;
+        cpu: string;
+        hardDisk: number;
+    };
+}

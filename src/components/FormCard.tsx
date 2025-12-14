@@ -20,6 +20,6 @@ const styles = StyleSheet.create({
         marginBottom: 14,
         overflow: "hidden",
         elevation: 2,
-        backgroundColor: "white",
+        backgroundColor: "#F6F9FF",
     },
 });
